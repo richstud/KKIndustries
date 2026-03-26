@@ -1,1 +1,51 @@
+name: KKIndusties – Supabase & Repo Keep Alive
 
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily Supabase ping (03:00 UTC = 08:30 IST)
+    - cron: "0 3 * * *"
+
+    # Monthly repo update (1st day, 04:00 UTC)
+    - cron: "0 4 1 * *"
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ----------------------------
+      # 0️⃣ CHECKOUT (ABSOLUTELY REQUIRED)
+      # ----------------------------
+      - name: Checkout KKIndusties repository
+        uses: actions/checkout@v4
+
+      # ----------------------------
+      # 1️⃣ DAILY: Supabase Ping
+      # ----------------------------
+      - name: Ping Supabase (KKIndusties)
+        run: |
+          echo "🔄 Pinging Supabase for KKIndusties..."
+          curl -s -o /dev/null -w "Status: %{http_code}\n" \
+          "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+
+      # ----------------------------
+      # 2️⃣ MONTHLY: Repo Update
+      # ----------------------------
+      - name: Monthly Repo Update (KKIndusties)
+        run: |
+          echo "📝 Monthly keep-alive update for KKIndusties" >> KKINDUSTIES_KEEPALIVE.md
+          date >> KKINDUSTIES_KEEPALIVE.md
+
+          git status
+          git config user.name "kkindusties-bot"
+          git config user.email "kkindusties-bot@users.noreply.github.com"
+
+          git add KKINDUSTIES_KEEPALIVE.md
+          git commit -m "chore(kkindusties): monthly keep-alive commit" || echo "Nothing to commit"
+          git push
