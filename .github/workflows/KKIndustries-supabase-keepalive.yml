@@ -3,13 +3,13 @@ name: KKIndusties – Supabase & Repo Keep Alive
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   workflow_dispatch:
   schedule:
-    # Daily Supabase ping (03:00 UTC = 08:30 IST)
     - cron: "0 3 * * *"
-
-    # Monthly repo update (1st day, 04:00 UTC)
     - cron: "0 4 1 * *"
 
 jobs:
@@ -17,30 +17,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ----------------------------
-      # 0️⃣ CHECKOUT (ABSOLUTELY REQUIRED)
-      # ----------------------------
+      # ✅ Updated to v5
       - name: Checkout KKIndusties repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # ----------------------------
-      # 1️⃣ DAILY: Supabase Ping (FIXED)
-      # ----------------------------
       - name: Ping Supabase (KKIndusties)
         run: |
           echo "🔄 Pinging Supabase for KKIndusties..."
           curl -s -o /dev/null -w "Status: %{http_code}\n" \
           "${{ secrets.SUPABASE_URL }}/auth/v1/health"
 
-      # ----------------------------
-      # 2️⃣ MONTHLY: Repo Update
-      # ----------------------------
       - name: Monthly Repo Update (KKIndusties)
         run: |
           echo "📝 Monthly keep-alive update for KKIndusties" >> KKINDUSTIES_KEEPALIVE.md
           date >> KKINDUSTIES_KEEPALIVE.md
 
-          git status
           git config user.name "kkindusties-bot"
           git config user.email "kkindusties-bot@users.noreply.github.com"
 
