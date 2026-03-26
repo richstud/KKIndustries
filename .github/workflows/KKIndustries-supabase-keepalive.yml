@@ -9,7 +9,10 @@ env:
 on:
   workflow_dispatch:
   schedule:
+    # Daily Supabase ping
     - cron: "0 3 * * *"
+
+    # Monthly repo update (1st day only)
     - cron: "0 4 1 * *"
 
 jobs:
@@ -17,17 +20,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Updated to v5
+      # ----------------------------
+      # Checkout Repo
+      # ----------------------------
       - name: Checkout KKIndusties repository
         uses: actions/checkout@v5
 
+      # ----------------------------
+      # Supabase Keep Alive (CLEAN - NO 401)
+      # ----------------------------
       - name: Ping Supabase (KKIndusties)
         run: |
           echo "🔄 Pinging Supabase for KKIndusties..."
           curl -s -o /dev/null -w "Status: %{http_code}\n" \
           "${{ secrets.SUPABASE_URL }}/auth/v1/health"
 
+      # ----------------------------
+      # Monthly Commit (ONLY on 1st day)
+      # ----------------------------
       - name: Monthly Repo Update (KKIndusties)
+        if: github.event.schedule == '0 4 1 * *'
         run: |
           echo "📝 Monthly keep-alive update for KKIndusties" >> KKINDUSTIES_KEEPALIVE.md
           date >> KKINDUSTIES_KEEPALIVE.md
