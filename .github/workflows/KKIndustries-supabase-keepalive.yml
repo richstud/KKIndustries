@@ -24,15 +24,13 @@ jobs:
         uses: actions/checkout@v4
 
       # ----------------------------
-      # 1️⃣ DAILY: Supabase Ping
+      # 1️⃣ DAILY: Supabase Ping (FIXED)
       # ----------------------------
       - name: Ping Supabase (KKIndusties)
         run: |
           echo "🔄 Pinging Supabase for KKIndusties..."
           curl -s -o /dev/null -w "Status: %{http_code}\n" \
-          "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          "${{ secrets.SUPABASE_URL }}/auth/v1/health"
 
       # ----------------------------
       # 2️⃣ MONTHLY: Repo Update
@@ -48,4 +46,4 @@ jobs:
 
           git add KKINDUSTIES_KEEPALIVE.md
           git commit -m "chore(kkindusties): monthly keep-alive commit" || echo "Nothing to commit"
-          git push
+          git push origin HEAD
